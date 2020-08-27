@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Example</string>
+    <string name="news_btn">News</string>
+    <string name="payment_btn">Payment</string>
+    <string name="p2p">P2P</string>
+    <string name="null_Notification">Notification</string>
+</resources>
