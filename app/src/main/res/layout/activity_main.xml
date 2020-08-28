@@ -1,76 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ @MMAsadovich
+  ~ 2020/8/28
+  ~ Created by Murodov Murodjon
+  -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:gravity="center"
+    android:id="@+id/main_layout"
     tools:context=".MainActivity">
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Click"
-        android:textSize="28sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.265" />
-
-    <Button
-        android:id="@+id/okButton"
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="52dp"
-        android:onClick="okButtonClick"
-        android:text="@string/news_btn"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.385" />
-
-    <Button
-        android:id="@+id/PButton"
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="32dp"
-        android:onClick="pBtnClick"
-        android:text="@string/p2p"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.583"
-        tools:ignore="MissingConstraints" />
-
-    <Button
-        android:id="@+id/paymentButton3"
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="32dp"
-        android:onClick="paymentClick"
-        android:text="@string/payment_btn"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.746"
-        tools:ignore="MissingConstraints" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:textSize="16sp"
-
-        />
 
 </LinearLayout>

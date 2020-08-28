@@ -1,14 +1,20 @@
+/*
+ * @MMAsadovich
+ * 2020/8/28
+ * Created by Murodov Murodjon
+ */
+
 package com.example.exaample;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Intent;
 import android.net.ConnectivityManager;
-import android.net.Network;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,8 +24,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.example.exaample.fcm.FirebaseMessageReceiver;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -27,78 +31,84 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-    private FirebaseAnalytics mFirebaseAnalytics;
     DatabaseReference ref;
     TextView textView ;
-    public static String notifyTitle ;
-    public static boolean is_connect = false;
+    public static String notifyTitle = "This is notification title";
+    public static boolean is_connect = false; // network status
+    String[] addData = {"News","P2P","Payment"};
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
+        FirebaseAnalytics.getInstance(this);
         textView = findViewById(R.id.textView);
         getConnect();
 
+        // set firstFragment
+        MainFragment mainFragment = new MainFragment();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().add(R.id.main_layout,mainFragment).commit();
+        getData();
     }
 
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
-        getConnect();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        getConnect();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        getConnect();
-    }
-
-    public void getData(final String s){
-        getConnect();
+    // Firebase change data listener fun()
+    public void getData(){
         if (is_connect){
-        ref = FirebaseDatabase.getInstance().getReference(s);
-        ref.addValueEventListener(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        collectNewsData((Map<String,Object>) dataSnapshot.getValue(),s);
-                    }
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.i("Error", databaseError.toString());
-                    }
-                });
-        }else {
-            Toast.makeText(this,"Internet disconnect",Toast.LENGTH_SHORT).show();
-        }
+            for (final String s : addData) {
+                ref = FirebaseDatabase.getInstance().getReference(s);
+                ref.addValueEventListener(
+                        new ValueEventListener() {
+                            boolean initial = true;
+
+                            // if change dataBase , this is working
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (initial) {
+                                    // 1 marta database tekshirmaydi
+                                    initial = false;
+                                    return;
+                                }
+                                collectNewsData((Map<String, Object>) dataSnapshot.getValue(), s);
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                Log.i("Error", databaseError.toString());
+                            }
+                        });
+            }
+            }else {
+                Toast.makeText(this,"Internet disconnect",Toast.LENGTH_SHORT).show();
+            }
     }
+
+    // database get last information
     private void collectNewsData(Map<String,Object> map, String s) {
         final ArrayList data = new ArrayList();
-        for (Map.Entry<String, Object> entry : map.entrySet()){
-            String value = (String) entry.getValue();
-            data.add(value);
-            Collections.sort(data);
+        try {
+            for (Map.Entry<String, Object> entry : map.entrySet()){
+                String value = (String) entry.getValue();
+                data.add(value);
+                Collections.sort(data);
+            }
+            String getValue = (String) data.get(data.size()-1);
+            // only change database notification working
+            notification(s,getValue);
+        }catch (Exception e){
+            Log.i("Error", "Sorry. Unhandled error!!!");
+            Toast.makeText(MainActivity.this,"Sorry. Unhandled error (",Toast.LENGTH_SHORT).show();
         }
-        String getValue = (String) data.get(data.size()-1);
-        notification(s,getValue);
     }
 
-    public void okButtonClick (View view ){
+    // Add firebase realtime database news
+    public void newsButtonClick (View view ){
         getConnect();
         if (is_connect) {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -106,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
                     FirebaseDatabase database = FirebaseDatabase.getInstance();
                     DatabaseReference myRef = database.getReference("News");
                     myRef.push().setValue("News " );
-                    getData("News");
                 }
             });
         }else {
@@ -114,16 +123,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void pBtnClick(View view){
+    // Add firebase realtime database p2p
+    public void p2pBtnClick(View view){
         getConnect();
         if (is_connect) {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 public void run() {
-                    getConnect();
                     FirebaseDatabase database = FirebaseDatabase.getInstance();
                     DatabaseReference myRef = database.getReference("P2P");
                     myRef.push().setValue("P2P ");
-                    getData("P2P");
                 }
             });
         }else {
@@ -131,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Add firebase realtime database  payment
     public void paymentClick(View view){
         getConnect();
         if (is_connect) {
@@ -138,9 +147,7 @@ public class MainActivity extends AppCompatActivity {
                 public void run() {
                     FirebaseDatabase database = FirebaseDatabase.getInstance();
                     DatabaseReference myRef = database.getReference("Payment");
-                   // currentTime = Calendar.getInstance().getTime();
                     myRef.push().setValue("Payment ");
-                    getData("Payment");
                 }
             });
         }else {
@@ -148,11 +155,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // add new data firebase show notification
     private void notification(String title, String message){
-        Intent intent = new Intent(this, NotifyActivity.class);
+        // add new data firebase set secondFragment
+        NotificationFragment fragment = new NotificationFragment();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.main_layout,fragment).commit();
+               Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                MainFragment fragment = new MainFragment();
+                FragmentTransaction fm = getSupportFragmentManager().beginTransaction();
+                fm.replace(R.id.main_layout,fragment).commit();
+            }
+        }, 2000); // two second again set firstFragment
+
         notifyTitle = title;
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_ONE_SHOT);
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O){
             NotificationChannel channel = new NotificationChannel("a","a", NotificationManager.IMPORTANCE_DEFAULT);
             NotificationManager manager = getSystemService(NotificationManager.class);
@@ -161,21 +180,22 @@ public class MainActivity extends AppCompatActivity {
                     .setContentTitle(title)
                     .setSmallIcon(R.drawable.firebase1)
                     .setAutoCancel(true)
-                    .setContentText(message + ". Click me! :)")
-                    .setContentIntent(pendingIntent);
+                    .setContentText(message + ". Success :)");
+                   // .setContentIntent(pendingIntent);
 
             NotificationManagerCompat managerCompat = NotificationManagerCompat.from(this);
             managerCompat.notify(999,builder.build());
         }
     }
+
+    //  Check network connection
     public void getConnect(){
         ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-            if (networkInfo != null){
-                is_connect = true;
-            } else {
-                is_connect = false;
-            }
-
+            is_connect = networkInfo != null;
     }
 }
+
+// Intent intent = new Intent(this, NotifyActivity.class);
+//intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_ONE_SHOT);
